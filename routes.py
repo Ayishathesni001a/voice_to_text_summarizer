@@ -243,43 +243,119 @@ def register_routes(app):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ transcription.title }} - VoiceText</title>
+    <title>{{ transcription.title }} - SpeechScribe</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-lg-10">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2>{{ transcription.title }}</h2>
-                        <div>
-                            <a href="{{ url_for('edit_transcription', id=transcription.id) }}" class="btn btn-primary btn-sm">Edit</a>
-                            <a href="{{ url_for('download_pdf', id=transcription.id) }}" class="btn btn-success btn-sm">Download PDF</a>
-                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
-                        </div>
+<body style="background-color: var(--dark-bg); color: var(--text-light);">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--dark-surface);">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <span class="fs-4 fw-bold text-primary me-2"><i class="fas fa-headphones"></i></span>
+                <span>SpeechScribe</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Dashboard</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="background-color: var(--dark-card);">
+                            <li><a class="dropdown-item text-light" href="{{ url_for('home') }}">Dashboard</a></li>
+                            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                            <li><a class="dropdown-item text-light" href="{{ url_for('logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container my-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Transcription</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2>{{ transcription.title }}</h2>
+                    <div>
+                        <a href="{{ url_for('edit_transcription', id=transcription.id) }}" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a href="{{ url_for('download_pdf', id=transcription.id) }}" class="btn btn-outline-success btn-sm me-2">
+                            <i class="fas fa-file-pdf me-1"></i> Download PDF
+                        </a>
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash-alt me-1"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                        <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Transcription</h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-4">
-                            <h4>Summary</h4>
-                            <div class="summary-text">{{ transcription.summary_text }}</div>
-                        </div>
-                        <div>
-                            <h4>Full Transcription</h4>
-                            <div class="transcription-text">{{ transcription.transcription_text }}</div>
-                        </div>
+                        <p class="mb-0 transcription-text">{{ transcription.transcription_text }}</p>
                     </div>
                     <div class="card-footer text-muted">
-                        Created on {{ transcription.created_at.strftime('%B %d, %Y at %H:%M') }}
+                        <small>Created on {{ transcription.created_at.strftime('%B %d, %Y at %H:%M') }}</small>
                     </div>
                 </div>
-                <div class="mt-3">
-                    <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+
+                {% if transcription.summary_text %}
+                <div class="card">
+                    <div class="card-header" style="background-color: var(--secondary-color); color: white;">
+                        <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0 summary-text">{{ transcription.summary_text }}</p>
+                    </div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3" style="background-color: var(--dark-surface);">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2025 SpeechScribe. All rights reserved.</span>
+        </div>
+    </footer>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -316,31 +392,96 @@ def register_routes(app):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Transcription - VoiceText</title>
+    <title>Edit Transcription - SpeechScribe</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-lg-10">
+<body style="background-color: var(--dark-bg); color: var(--text-light);">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--dark-surface);">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <span class="fs-4 fw-bold text-primary me-2"><i class="fas fa-headphones"></i></span>
+                <span>SpeechScribe</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Dashboard</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" style="background-color: var(--dark-card);">
+                            <li><a class="dropdown-item text-light" href="{{ url_for('home') }}">Dashboard</a></li>
+                            <li><hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.1);"></li>
+                            <li><a class="dropdown-item text-light" href="{{ url_for('logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container my-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('view_transcription', id=transcription.id) }}">Transcription</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Edit Transcription: {{ transcription.title }}</h2>
+                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
+                        <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Transcription</h4>
                     </div>
                     <div class="card-body">
                         <form method="post">
                             {{ form.hidden_tag() }}
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="transcription" class="form-label">Transcription Text</label>
-                                {{ form.transcription(class="form-control", rows=10) }}
+                                {{ form.transcription(class="form-control", rows=15) }}
                                 {% for error in form.transcription.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                 {% endfor %}
+                                <div class="form-text">Edit the transcription text as needed. The summary will be automatically regenerated.</div>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <a href="{{ url_for('view_transcription', id=transcription.id) }}" class="btn btn-secondary">Cancel</a>
-                                {{ form.submit(class="btn btn-primary") }}
+                                <a href="{{ url_for('view_transcription', id=transcription.id) }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> {{ form.submit.label.text }}
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -348,6 +489,14 @@ def register_routes(app):
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3" style="background-color: var(--dark-surface);">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2025 SpeechScribe. All rights reserved.</span>
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
