@@ -37,77 +37,83 @@
         <div class="col-md-8">
             <div class="card mb-4">
                 <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs" id="transcriptionTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="record-tab" data-bs-toggle="tab" data-bs-target="#record" type="button" role="tab" aria-controls="record" aria-selected="true">
-                                <i class="fas fa-microphone me-1"></i> Record
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="false">
-                                <i class="fas fa-upload me-1"></i> Upload
-                            </button>
-                        </li>
-                    </ul>
+                    <h5 class="mb-0">Start Transcribing</h5>
                 </div>
-                <div class="card-body">
-                    <div class="tab-content" id="transcriptionTabContent">
-                        <!-- Record Tab -->
-                        <div class="tab-pane fade show active" id="record" role="tabpanel" aria-labelledby="record-tab">
-                            <h4 class="mb-3">Record Audio</h4>
-                            <p>Click the record button and speak. Click stop when you're finished.</p>
-                            
-                            <div class="mb-3">
-                                <label for="recordingTitle" class="form-label">Title (Optional)</label>
-                                <input type="text" class="form-control" id="recordingTitle" placeholder="Enter a title for your recording">
-                            </div>
-                            
-                            <div id="recordingVisualizer" class="audio-visualizer d-none"></div>
-                            
-                            <div id="recordingControls" class="recording-controls">
-                                <button id="recordButton" class="btn btn-danger record-button" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
-                                    <i class="fas fa-microphone"></i>
-                                </button>
-                                <button id="stopRecordButton" class="btn btn-danger record-button d-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
-                                    <i class="fas fa-stop"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="text-center">
-                                <p id="recordStatus" class="text-secondary">Ready to record</p>
-                            </div>
+                <div class="card-body text-center">
+                    <h4 class="mb-4">Choose an option to begin</h4>
+                    
+                    <div class="d-flex justify-content-center gap-4 mb-4">
+                        <button id="showRecordButton" class="btn btn-primary btn-lg">
+                            <i class="fas fa-microphone me-2"></i>Record Audio
+                        </button>
+                        <button id="showUploadButton" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-upload me-2"></i>Upload File
+                        </button>
+                    </div>
+                    
+                    <!-- Record Panel (Initially Hidden) -->
+                    <div id="recordPanel" class="d-none">
+                        <h4 class="mb-3">Record Audio</h4>
+                        <p>Click the record button and speak. Click stop when you're finished.</p>
+                        
+                        <div class="mb-3">
+                            <label for="recordingTitle" class="form-label">Title (Optional)</label>
+                            <input type="text" class="form-control" id="recordingTitle" placeholder="Enter a title for your recording">
                         </div>
                         
-                        <!-- Upload Tab -->
-                        <div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
-                            <h4 class="mb-3">Upload Audio File</h4>
-                            <p>Upload an audio file to transcribe (.mp3, .wav, .m4a, etc.)</p>
-                            
-                            <form action="{{ url_for('upload_audio') }}" method="post" enctype="multipart/form-data">
-                                {{ form.hidden_tag() }}
-                                
-                                <div class="mb-3">
-                                    <label for="title" class="form-label">Title (Optional)</label>
-                                    {{ form.title(class="form-control", id="title", placeholder="Enter a title for your transcription") }}
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="audioFileInput" class="form-label">Audio File</label>
-                                    <div class="input-group">
-                                        {{ form.audio_file(class="form-control", id="audioFileInput", style="display: none;") }}
-                                        <label for="audioFileInput" id="audioFileLabel" class="form-control text-muted" style="cursor: pointer;">Choose audio file</label>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('audioFileInput').click()">
-                                            <i class="fas fa-folder-open"></i>
-                                        </button>
-                                    </div>
-                                    <div class="form-text">Supported formats: MP3, WAV, M4A, etc.</div>
-                                </div>
-                                
-                                <div class="d-grid">
-                                    {{ form.submit(class="btn btn-primary") }}
-                                </div>
-                            </form>
+                        <div id="recordingVisualizer" class="audio-visualizer d-none"></div>
+                        
+                        <div id="recordingControls" class="recording-controls">
+                            <button id="recordButton" class="btn btn-danger record-button" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button id="stopRecordButton" class="btn btn-danger record-button d-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
+                                <i class="fas fa-stop"></i>
+                            </button>
                         </div>
+                        
+                        <div class="text-center">
+                            <p id="recordStatus" class="text-secondary">Ready to record</p>
+                        </div>
+                        
+                        <button id="backFromRecord" class="btn btn-outline-secondary mt-3">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </button>
+                    </div>
+                    
+                    <!-- Upload Panel (Initially Hidden) -->
+                    <div id="uploadPanel" class="d-none">
+                        <h4 class="mb-3">Upload Audio File</h4>
+                        <p>Upload an audio file to transcribe (.mp3, .wav, .m4a, etc.)</p>
+                        
+                        <form action="{{ url_for('upload_audio') }}" method="post" enctype="multipart/form-data">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title (Optional)</label>
+                                {{ form.title(class="form-control", id="title", placeholder="Enter a title for your transcription") }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="audioFileInput" class="form-label">Audio File</label>
+                                <div class="input-group">
+                                    {{ form.audio_file(class="form-control", id="audioFileInput", style="display: none;") }}
+                                    <label for="audioFileInput" id="audioFileLabel" class="form-control text-muted" style="cursor: pointer;">Choose audio file</label>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('audioFileInput').click()">
+                                        <i class="fas fa-folder-open"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Supported formats: MP3, WAV, M4A, etc.</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                        
+                        <button id="backFromUpload" class="btn btn-outline-secondary mt-3">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </button>
                     </div>
                 </div>
             </div>
@@ -127,7 +133,7 @@
             <div id="resultCards" class="d-none">
                 <!-- Transcription card -->
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header" style="background-color: var(--primary-color); color: white;">
                         <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Transcription</h5>
                     </div>
                     <div class="card-body">
@@ -137,7 +143,7 @@
                 
                 <!-- Summary card -->
                 <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header" style="background-color: var(--secondary-color); color: white;">
                         <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Summary</h5>
                     </div>
                     <div class="card-body">
@@ -147,10 +153,10 @@
                 
                 <!-- Action buttons -->
                 <div class="d-flex justify-content-end mb-4">
-                    <button id="editTranscriptionBtn" class="btn btn-outline-primary me-2">
+                    <button id="editTranscriptionBtn" class="btn me-2" style="border-color: var(--primary-color); color: var(--primary-color);">
                         <i class="fas fa-edit me-1"></i> Edit
                     </button>
-                    <button id="downloadPdfBtn" class="btn btn-outline-success">
+                    <button id="downloadPdfBtn" class="btn" style="border-color: var(--secondary-color); color: var(--text-light);">
                         <i class="fas fa-file-pdf me-1"></i> Download PDF
                     </button>
                 </div>

@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     initializeTooltips();
     
+    // Initialize home page UI behavior
+    initializeHomePage();
+    
     // Initialize recording functionality if on home page
     if (document.getElementById('recordButton')) {
         initializeRecording();
@@ -15,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle transcription list items
     initializeTranscriptionList();
+    
+    // Hide result cards initially - they should only show after processing
+    const resultCards = document.getElementById('resultCards');
+    if (resultCards) {
+        resultCards.classList.add('d-none');
+    }
 });
 
 // Initialize Bootstrap tooltips
@@ -76,7 +85,7 @@ function initializeRecording() {
             
             analyser.getByteFrequencyData(dataArray);
             
-            canvasCtx.fillStyle = 'rgb(26, 26, 46)';
+            canvasCtx.fillStyle = 'rgb(30, 30, 30)';
             canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
             
             const barWidth = (canvas.width / bufferLength) * 2.5;
@@ -86,8 +95,9 @@ function initializeRecording() {
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = dataArray[i] / 2;
                 
-                // Use primary color for bars
-                canvasCtx.fillStyle = `rgb(142, 68, 173)`;
+                // Use primary color for bars with gradient effect based on height
+                const intensity = Math.min(255, Math.floor(barHeight * 3));
+                canvasCtx.fillStyle = `rgb(156, 39, 176, ${barHeight/60})`;
                 canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
                 
                 x += barWidth + 1;
@@ -298,4 +308,47 @@ function showAlert(message, type = 'info') {
         const bsAlert = new bootstrap.Alert(alertElement);
         bsAlert.close();
     }, 5000);
+}
+
+// Initialize home page UI behavior
+function initializeHomePage() {
+    const showRecordButton = document.getElementById('showRecordButton');
+    const showUploadButton = document.getElementById('showUploadButton');
+    const recordPanel = document.getElementById('recordPanel');
+    const uploadPanel = document.getElementById('uploadPanel');
+    const backFromRecordButton = document.getElementById('backFromRecord');
+    const backFromUploadButton = document.getElementById('backFromUpload');
+    const initialButtonsContainer = document.querySelector('.justify-content-center.gap-4');
+    
+    // Show Record Panel
+    if (showRecordButton) {
+        showRecordButton.addEventListener('click', function() {
+            initialButtonsContainer.classList.add('d-none');
+            recordPanel.classList.remove('d-none');
+        });
+    }
+    
+    // Show Upload Panel
+    if (showUploadButton) {
+        showUploadButton.addEventListener('click', function() {
+            initialButtonsContainer.classList.add('d-none');
+            uploadPanel.classList.remove('d-none');
+        });
+    }
+    
+    // Back from Record Panel
+    if (backFromRecordButton) {
+        backFromRecordButton.addEventListener('click', function() {
+            recordPanel.classList.add('d-none');
+            initialButtonsContainer.classList.remove('d-none');
+        });
+    }
+    
+    // Back from Upload Panel
+    if (backFromUploadButton) {
+        backFromUploadButton.addEventListener('click', function() {
+            uploadPanel.classList.add('d-none');
+            initialButtonsContainer.classList.remove('d-none');
+        });
+    }
 }
