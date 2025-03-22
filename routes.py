@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
 from models import User, Transcription
-from forms import LoginForm, SignupForm, AudioUploadForm, TranscriptionEditForm
+from forms import LoginForm, SignupForm, AudioUploadForm, TranscriptionEditForm, SummaryEditForm
 from transcription import transcribe_audio
 from summarization import generate_summary
 from pdf_generator import create_pdf
@@ -201,6 +201,23 @@ def register_routes(app):
             return redirect(url_for('view_transcription', id=id))
             
         return render_template('edit_transcription.html', form=form, transcription=transcription)
+        
+    @app.route('/edit_summary/<int:id>', methods=['GET', 'POST'])
+    @login_required
+    def edit_summary(id):
+        transcription = Transcription.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+        form = SummaryEditForm()
+        
+        if request.method == 'GET':
+            form.summary.data = transcription.summary_text
+            
+        if form.validate_on_submit():
+            transcription.summary_text = form.summary.data
+            db.session.commit()
+            flash('Summary updated successfully!')
+            return redirect(url_for('view_transcription', id=id))
+            
+        return render_template('edit_summary.html', form=form, transcription=transcription)
     
     @app.route('/download_pdf/<int:id>')
     @login_required

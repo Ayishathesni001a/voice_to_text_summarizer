@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Summary - SpeechScribe{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: var(--secondary-color); color: white;">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Summary</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="summary" class="form-label">Summary</label>
+                            {{ form.summary(class="form-control", rows=10, id="summary") }}
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('view_transcription', id=transcription.id) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Transcription
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

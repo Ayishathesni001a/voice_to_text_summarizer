@@ -34,3 +34,7 @@ class AudioUploadForm(FlaskForm):
 class TranscriptionEditForm(FlaskForm):
     transcription = TextAreaField('Transcription', validators=[DataRequired()])
     submit = SubmitField('Update Transcription')
+    
+class SummaryEditForm(FlaskForm):
+    summary = TextAreaField('Summary', validators=[DataRequired()])
+    submit = SubmitField('Update Summary')
