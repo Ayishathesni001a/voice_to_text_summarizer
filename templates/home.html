@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VoiceText{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Left sidebar with transcription history -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Transcription History</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="transcription-history">
+                        {% if transcriptions %}
+                            {% for transcription in transcriptions %}
+                                <div class="transcription-item" data-id="{{ transcription.id }}">
+                                    <h6 class="mb-1">{{ transcription.title }}</h6>
+                                    <div class="transcription-date">
+                                        <small>{{ transcription.created_at.strftime('%B %d, %Y at %H:%M') }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="p-3 text-center text-muted">
+                                <p>No transcriptions yet</p>
+                                <p><small>Start by recording or uploading audio</small></p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content area -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="transcriptionTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="record-tab" data-bs-toggle="tab" data-bs-target="#record" type="button" role="tab" aria-controls="record" aria-selected="true">
+                                <i class="fas fa-microphone me-1"></i> Record
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="false">
+                                <i class="fas fa-upload me-1"></i> Upload
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="transcriptionTabContent">
+                        <!-- Record Tab -->
+                        <div class="tab-pane fade show active" id="record" role="tabpanel" aria-labelledby="record-tab">
+                            <h4 class="mb-3">Record Audio</h4>
+                            <p>Click the record button and speak. Click stop when you're finished.</p>
+                            
+                            <div class="mb-3">
+                                <label for="recordingTitle" class="form-label">Title (Optional)</label>
+                                <input type="text" class="form-control" id="recordingTitle" placeholder="Enter a title for your recording">
+                            </div>
+                            
+                            <div id="recordingVisualizer" class="audio-visualizer d-none"></div>
+                            
+                            <div id="recordingControls" class="recording-controls">
+                                <button id="recordButton" class="btn btn-danger record-button" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <button id="stopRecordButton" class="btn btn-danger record-button d-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
+                                    <i class="fas fa-stop"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="text-center">
+                                <p id="recordStatus" class="text-secondary">Ready to record</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload Tab -->
+                        <div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                            <h4 class="mb-3">Upload Audio File</h4>
+                            <p>Upload an audio file to transcribe (.mp3, .wav, .m4a, etc.)</p>
+                            
+                            <form action="{{ url_for('upload_audio') }}" method="post" enctype="multipart/form-data">
+                                {{ form.hidden_tag() }}
+                                
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title (Optional)</label>
+                                    {{ form.title(class="form-control", id="title", placeholder="Enter a title for your transcription") }}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="audioFileInput" class="form-label">Audio File</label>
+                                    <div class="input-group">
+                                        {{ form.audio_file(class="form-control", id="audioFileInput", style="display: none;") }}
+                                        <label for="audioFileInput" id="audioFileLabel" class="form-control text-muted" style="cursor: pointer;">Choose audio file</label>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('audioFileInput').click()">
+                                            <i class="fas fa-folder-open"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Supported formats: MP3, WAV, M4A, etc.</div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    {{ form.submit(class="btn btn-primary") }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Processing overlay -->
+            <div id="processingOverlay" class="card mb-4 d-none">
+                <div class="card-body text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5>Processing your audio...</h5>
+                    <p class="text-muted">This may take a moment depending on the length of your recording.</p>
+                </div>
+            </div>
+            
+            <!-- Quick tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>For best recording quality, use a headset or external microphone</li>
+                        <li>Speak clearly and at a moderate pace</li>
+                        <li>Minimize background noise during recording</li>
+                        <li>For file uploads, higher quality audio produces better transcripts</li>
+                        <li>Click on any transcription in the history to view, edit, or download as PDF</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

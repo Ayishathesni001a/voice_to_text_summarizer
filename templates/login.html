@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Login - VoiceText{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="auth-container">
+                <div class="card">
+                    <div class="card-body auth-form">
+                        <h2 class="auth-title">Login</h2>
+                        
+                        <form method="POST" action="{{ url_for('login') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                {{ form.email(class="form-control", id="email", placeholder="Enter your email") }}
+                                {% for error in form.email.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                {{ form.password(class="form-control", id="password", placeholder="Enter your password") }}
+                                {% for error in form.password.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                        
+                        <div class="auth-footer">
+                            <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

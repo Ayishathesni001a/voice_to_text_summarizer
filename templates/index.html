@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}VoiceText - Transform Your Voice to Text{% endblock %}
+
+{% block content %}
+<div class="landing-hero">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8 text-center">
+                <h1 class="display-4 fw-bold mb-4" style="color: var(--primary-color);">Transform Your Voice to Text</h1>
+                <p class="lead mb-4">Record or upload audio files and instantly convert them to text with our advanced transcription technology. Summarize and save your transcriptions with ease.</p>
+                <div class="mt-5">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg px-4 me-md-2">Go to Dashboard</a>
+                    {% else %}
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row text-center mb-5">
+        <div class="col">
+            <h2 class="mb-4">Features</h2>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <h4 class="card-title">Voice Recording</h4>
+                    <p class="card-text">Record your voice directly in your browser with our easy-to-use interface. No additional software required.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-audio"></i>
+                    </div>
+                    <h4 class="card-title">Audio Upload</h4>
+                    <p class="card-text">Upload audio files for transcription. Supports various audio formats including WAV, MP3, and more.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-align-left"></i>
+                    </div>
+                    <h4 class="card-title">Accurate Transcription</h4>
+                    <p class="card-text">Our advanced speech recognition technology provides high-quality transcriptions for your audio.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4 class="card-title">Text Summarization</h4>
+                    <p class="card-text">Get concise summaries of your transcriptions to quickly understand the key points.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4 class="card-title">PDF Export</h4>
+                    <p class="card-text">Download your transcriptions and summaries as PDF files for easy sharing and storage.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h4 class="card-title">Transcription History</h4>
+                    <p class="card-text">Access all your past transcriptions any time in your personalized dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="py-5 bg-dark">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="mb-4">Ready to get started?</h2>
+                <p class="lead mb-4">Join thousands of users who save time with our voice-to-text solution.</p>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg">Sign Up Now - It's Free!</a>
+                {% else %}
+                <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
