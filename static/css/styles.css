@@ -1,11 +1,11 @@
 /* Global Variables */
 :root {
-    --primary-color: #8e44ad;
-    --primary-dark: #6c3483;
-    --secondary-color: #3498db;
-    --dark-bg: #1a1a2e;
-    --dark-surface: #16213e;
-    --dark-card: #0f3460;
+    --primary-color: #9c27b0;
+    --primary-dark: #7b1fa2;
+    --secondary-color: #4a4a4a;
+    --dark-bg: #121212;
+    --dark-surface: #1e1e1e;
+    --dark-card: #252525;
     --text-light: #f1f1f1;
     --text-muted: #b2b2b2;
     --danger: #e74c3c;
@@ -165,7 +165,7 @@ body {
 }
 
 .transcription-item:hover {
-    background-color: rgba(15, 52, 96, 0.8);
+    background-color: rgba(37, 37, 37, 0.8);
 }
 
 .transcription-date {
