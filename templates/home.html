@@ -4,10 +4,10 @@
 
 {% block content %}
 <div class="container-fluid px-4">
-    <div class="row">
+    <div class="row g-0">
         <!-- Main content area -->
-        <div class="col-md-8">
-            <div class="card mb-4">
+        <div class="col-md-9">
+            <div class="card mb-4" style="max-width: 90%; margin: 0 auto;">
                 <div class="card-header">
                     <h5 class="mb-0">Start Transcribing</h5>
                 </div>
@@ -28,8 +28,8 @@
                         <h4 class="mb-3">Record Audio</h4>
                         <p>Click the record button and speak. Click stop when you're finished.</p>
                         
-                        <div class="mb-3">
-                            <label for="recordingTitle" class="form-label">Title (Optional)</label>
+                        <div class="mb-3 mx-auto" style="max-width: 80%;">
+                            <label for="recordingTitle" class="form-label text-center d-block">Title (Optional)</label>
                             <input type="text" class="form-control" id="recordingTitle" placeholder="Enter a title for your recording">
                         </div>
                         
@@ -61,13 +61,13 @@
                         <form action="{{ url_for('upload_audio') }}" method="post" enctype="multipart/form-data">
                             {{ form.hidden_tag() }}
                             
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Title (Optional)</label>
+                            <div class="mb-3 mx-auto" style="max-width: 80%;">
+                                <label for="title" class="form-label text-center d-block">Title (Optional)</label>
                                 {{ form.title(class="form-control", id="title", placeholder="Enter a title for your transcription") }}
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="audioFileInput" class="form-label">Audio File</label>
+                            <div class="mb-3 mx-auto" style="max-width: 80%;">
+                                <label for="audioFileInput" class="form-label text-center d-block">Audio File</label>
                                 <div class="input-group">
                                     {{ form.audio_file(class="form-control", id="audioFileInput", style="display: none;") }}
                                     <label for="audioFileInput" id="audioFileLabel" class="form-control text-muted" style="cursor: pointer;">Choose audio file</label>
@@ -75,7 +75,7 @@
                                         <i class="fas fa-folder-open"></i>
                                     </button>
                                 </div>
-                                <div class="form-text">Supported formats: MP3, WAV, M4A, etc.</div>
+                                <div class="form-text text-center">Supported formats: MP3, WAV, M4A, etc.</div>
                             </div>
                             
                             <div class="d-grid">
@@ -135,14 +135,14 @@
             </div>
         </div>
         
-        <!-- Right sidebar with transcription history -->
-        <div class="col-md-4 pl-0">
-            <div class="card">
+        <!-- Left sidebar with transcription history -->
+        <div class="col-md-3 ps-0">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5 class="mb-0">Transcription History</h5>
                 </div>
                 <div class="card-body p-0">
-                    <div class="transcription-history">
+                    <div class="transcription-history-sidebar">
                         {% if transcriptions %}
                             {% for transcription in transcriptions %}
                                 <div class="transcription-item" data-id="{{ transcription.id }}">

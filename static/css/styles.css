@@ -155,6 +155,11 @@ body {
     overflow-y: auto;
 }
 
+.transcription-history-sidebar {
+    height: calc(100vh - 180px);
+    overflow-y: auto;
+}
+
 .transcription-item {
     background-color: var(--dark-surface);
     border-radius: var(--border-radius);
