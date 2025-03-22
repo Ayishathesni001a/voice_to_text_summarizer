@@ -107,13 +107,18 @@ def register_routes(app):
                 db.session.add(transcription)
                 db.session.commit()
                 
-                flash('Audio successfully transcribed!')
-                
                 # Clean up the temporary file
                 os.unlink(file_path)
                 os.rmdir(temp_dir)
                 
-                return redirect(url_for('home'))
+                # Instead of redirecting, render the home template with the transcription data
+                transcriptions = current_user.transcriptions.order_by(Transcription.created_at.desc()).all()
+                
+                # Flash a success message
+                flash('Audio successfully transcribed!')
+                
+                # Return to view the new transcription
+                return redirect(url_for('view_transcription', id=transcription.id))
             except Exception as e:
                 logger.error(f"Error in upload_audio: {str(e)}")
                 flash(f'Error processing audio: {str(e)}')
@@ -163,9 +168,10 @@ def register_routes(app):
             
             return jsonify({
                 'success': True,
-                'transcription_id': transcription.id,
+                'id': transcription.id,
                 'transcription': transcription_text,
-                'summary': summary
+                'summary': summary,
+                'title': title
             })
             
         except Exception as e:

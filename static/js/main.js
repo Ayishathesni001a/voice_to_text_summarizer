@@ -167,8 +167,54 @@ function initializeRecording() {
         })
         .then(data => {
             if (data.success) {
-                // Reload the page to show the new transcription
-                window.location.reload();
+                // Hide processing overlay
+                processingOverlay.classList.add('d-none');
+                
+                // Display the results
+                const resultCards = document.getElementById('resultCards');
+                const transcriptionResult = document.getElementById('transcriptionResult');
+                const summaryResult = document.getElementById('summaryResult');
+                const editBtn = document.getElementById('editTranscriptionBtn');
+                const downloadBtn = document.getElementById('downloadPdfBtn');
+                
+                if (resultCards && transcriptionResult && summaryResult) {
+                    // Show the results container
+                    resultCards.classList.remove('d-none');
+                    
+                    // Display transcription
+                    transcriptionResult.textContent = data.transcription || 'No transcription available';
+                    
+                    // Display summary if available
+                    if (data.summary) {
+                        summaryResult.textContent = data.summary;
+                    } else {
+                        summaryResult.textContent = 'Summary not available';
+                    }
+                    
+                    // Set up buttons
+                    if (editBtn && data.id) {
+                        editBtn.addEventListener('click', function() {
+                            window.location.href = `/transcription/${data.id}/edit`;
+                        });
+                    }
+                    
+                    if (downloadBtn && data.id) {
+                        downloadBtn.addEventListener('click', function() {
+                            window.location.href = `/transcription/${data.id}/pdf`;
+                        });
+                    }
+                    
+                    // Update status
+                    recordStatus.textContent = 'Transcription complete';
+                    recordStatus.classList.remove('text-warning');
+                    recordStatus.classList.add('text-success');
+                    
+                    // Scroll to results
+                    resultCards.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Fallback if the result containers aren't found
+                    window.location.href = `/transcription/${data.id}`;
+                }
             } else {
                 showAlert(data.error || 'Failed to transcribe audio.', 'danger');
                 processingOverlay.classList.add('d-none');

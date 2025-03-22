@@ -123,6 +123,39 @@
                 </div>
             </div>
             
+            <!-- Transcription and Summary Results -->
+            <div id="resultCards" class="d-none">
+                <!-- Transcription card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Transcription</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="transcriptionResult" class="mb-0"></div>
+                    </div>
+                </div>
+                
+                <!-- Summary card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="summaryResult" class="mb-0"></div>
+                    </div>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="d-flex justify-content-end mb-4">
+                    <button id="editTranscriptionBtn" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </button>
+                    <button id="downloadPdfBtn" class="btn btn-outline-success">
+                        <i class="fas fa-file-pdf me-1"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+            
             <!-- Quick tips -->
             <div class="card">
                 <div class="card-header">
