@@ -3,36 +3,8 @@
 {% block title %}Dashboard - SpeechScribe{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid px-4">
     <div class="row">
-        <!-- Left sidebar with transcription history -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Transcription History</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="transcription-history">
-                        {% if transcriptions %}
-                            {% for transcription in transcriptions %}
-                                <div class="transcription-item" data-id="{{ transcription.id }}">
-                                    <h6 class="mb-1">{{ transcription.title }}</h6>
-                                    <div class="transcription-date">
-                                        <small>{{ transcription.created_at.strftime('%B %d, %Y at %H:%M') }}</small>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="p-3 text-center text-muted">
-                                <p>No transcriptions yet</p>
-                                <p><small>Start by recording or uploading audio</small></p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <!-- Main content area -->
         <div class="col-md-8">
             <div class="card mb-4">
@@ -64,10 +36,10 @@
                         <div id="recordingVisualizer" class="audio-visualizer d-none"></div>
                         
                         <div id="recordingControls" class="recording-controls">
-                            <button id="recordButton" class="btn btn-danger record-button" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
+                            <button id="recordButton" class="btn record-button" style="background-color: var(--primary-color); color: white;" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
                                 <i class="fas fa-microphone"></i>
                             </button>
-                            <button id="stopRecordButton" class="btn btn-danger record-button d-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
+                            <button id="stopRecordButton" class="btn record-button d-none" style="background-color: var(--primary-color); color: white;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
                                 <i class="fas fa-stop"></i>
                             </button>
                         </div>
@@ -161,18 +133,32 @@
                     </button>
                 </div>
             </div>
-            
-            <!-- Quick tips -->
+        </div>
+        
+        <!-- Right sidebar with transcription history -->
+        <div class="col-md-4 pl-0">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Quick Tips</h5>
+                    <h5 class="mb-0">Transcription History</h5>
                 </div>
-                <div class="card-body">
-                    <p class="mb-2">For best recording quality, use a headset or external microphone</p>
-                    <p class="mb-2">Speak clearly and at a moderate pace for better accuracy</p>
-                    <p class="mb-2">Minimize background noise during recording sessions</p>
-                    <p class="mb-2">For file uploads, higher quality audio produces better transcripts</p>
-                    <p class="mb-0">Click on any transcription in the history to view, edit, or download as PDF</p>
+                <div class="card-body p-0">
+                    <div class="transcription-history">
+                        {% if transcriptions %}
+                            {% for transcription in transcriptions %}
+                                <div class="transcription-item" data-id="{{ transcription.id }}">
+                                    <h6 class="mb-1">{{ transcription.title }}</h6>
+                                    <div class="transcription-date">
+                                        <small>{{ transcription.created_at.strftime('%B %d, %Y at %H:%M') }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="p-3 text-center text-muted">
+                                <p>No transcriptions yet</p>
+                                <p><small>Start by recording or uploading audio</small></p>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

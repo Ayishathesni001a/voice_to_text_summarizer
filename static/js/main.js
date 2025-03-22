@@ -134,7 +134,7 @@ function initializeRecording() {
                 stopRecordButton.classList.remove('d-none');
                 recordStatus.textContent = 'Recording... (click stop when finished)';
                 recordStatus.classList.remove('text-secondary');
-                recordStatus.classList.add('text-danger');
+                recordStatus.classList.add('text-primary');
                 recordingVisualizerContainer.classList.remove('d-none');
             })
             .catch(error => {
@@ -153,7 +153,7 @@ function initializeRecording() {
             stopRecordButton.classList.add('d-none');
             recordButton.classList.remove('d-none');
             recordStatus.textContent = 'Processing audio...';
-            recordStatus.classList.remove('text-danger');
+            recordStatus.classList.remove('text-primary');
             recordStatus.classList.add('text-warning');
             processingOverlay.classList.remove('d-none');
         }
@@ -257,14 +257,23 @@ function initializeRecording() {
 function initializeFileUpload() {
     const fileInput = document.getElementById('audioFileInput');
     const fileLabel = document.getElementById('audioFileLabel');
+    const titleInput = document.getElementById('title');
     
     if (fileInput && fileLabel) {
         fileInput.addEventListener('change', function() {
             if (fileInput.files.length > 0) {
                 const fileName = fileInput.files[0].name;
                 fileLabel.textContent = fileName;
+                fileLabel.style.color = "white";
+                
+                // Auto-populate title with the filename (without extension)
+                if (titleInput && !titleInput.value) {
+                    const baseName = fileName.split('.').slice(0, -1).join('.');
+                    titleInput.value = baseName || fileName;
+                }
             } else {
                 fileLabel.textContent = 'Choose audio file';
+                fileLabel.style.color = "var(--text-muted)";
             }
         });
     }
