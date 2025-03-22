@@ -236,3 +236,21 @@ body {
 .auth-footer a:hover {
     text-decoration: underline;
 }
+
+/* Logo and App Name Styling */
+.app-logo {
+    color: var(--primary-color);
+}
+
+.app-name {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.speech-text {
+    color: white;
+}
+
+.scribe-text {
+    color: #ff79c6;
+}
