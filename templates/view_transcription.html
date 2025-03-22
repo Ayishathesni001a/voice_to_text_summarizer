@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header" style="background-color: var(--primary-color); color: white;">
                     <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Transcription</h5>
                 </div>
                 <div class="card-body">
@@ -45,7 +45,7 @@
 
             {% if transcription.summary_text %}
             <div class="card">
-                <div class="card-header bg-success text-white">
+                <div class="card-header" style="background-color: var(--secondary-color); color: white;">
                     <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Summary</h5>
                 </div>
                 <div class="card-body">
@@ -70,7 +70,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="{{ url_for('delete_transcription', id=transcription.id) }}" class="btn btn-danger">Delete</a>
+                <form action="{{ url_for('delete_transcription', id=transcription.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
             </div>
         </div>
     </div>
