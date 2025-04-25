@@ -26,6 +26,11 @@ class SignupForm(FlaskForm):
         if user is not None:
             raise ValidationError('Please use a different email address.')
 
+class RecordingForm(FlaskForm):
+    title = StringField('Title (Optional)', validators=[Length(max=100)])
+    audio = FileField('Audio Recording', validators=[DataRequired()])  # Required for recording
+    submit = SubmitField('Transcribe')
+
 class AudioUploadForm(FlaskForm):
     title = StringField('Title (Optional)', validators=[Length(max=100)])
     audio_file = FileField('Audio File')

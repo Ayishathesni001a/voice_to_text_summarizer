@@ -1,15 +1,35 @@
+
+import nltk
+nltk.download('punkt_tab')
 import os
 import tempfile
 from flask import render_template, redirect, url_for, flash, request, jsonify, send_file
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
-from models import User, Transcription
+from models import User, Transcription 
 from forms import LoginForm, SignupForm, AudioUploadForm, TranscriptionEditForm, SummaryEditForm
 from transcription import transcribe_audio
 from summarization import generate_summary
 from pdf_generator import create_pdf
+from app import app
+from werkzeug.security import generate_password_hash, check_password_hash
+from app import db, logger  # Adjust imports
+from models import Transcription  # Adjust model import
+import traceback
 import logging
+from pydub import AudioSegment
+
+import logging
+from uuid import uuid4
+import traceback
+import time
+import io
+import subprocess
+
+
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +58,8 @@ def register_routes(app):
             return redirect(next_page)
         
         return render_template('login.html', form=form)
-    
+        
+
     @app.route('/signup', methods=['GET', 'POST'])
     def signup():
         if current_user.is_authenticated:
@@ -46,15 +67,43 @@ def register_routes(app):
         
         form = SignupForm()
         if form.validate_on_submit():
-            user = User(username=form.username.data, email=form.email.data)
-            user.set_password(form.password.data)
+            username = form.username.data
+            email = form.email.data
+            plain_password = form.password.data  # The raw password entered by the user
+            
+            # Hash the password before storing it in the database
+            hashed_password = generate_password_hash(plain_password)
+
+            # Register as a normal User
+            user = User(username=username, email=email, password_hash=hashed_password)
             db.session.add(user)
             db.session.commit()
-            flash('Congratulations, you are now registered!')
+            flash('Congratulations, you are now registered!', 'success')
             return redirect(url_for('login'))
-        
+
         return render_template('signup.html', form=form)
-    
+
+        
+    @app.route('/delete_user/<int:user_id>')
+    def delete_user(user_id):
+        # Fetch the user and delete from database
+        user = User.query.get(user_id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+        return redirect(url_for('admin_dashboard'))
+
+    @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+    def edit_user(user_id):
+        user = User.query.get(user_id)
+        if request.method == 'POST':
+            # Update user details
+            user.username = request.form['username']
+            user.email = request.form['email']
+            db.session.commit()
+            return redirect(url_for('admin_dashboard'))
+        return render_template('edit_user.html', user=user)
+        
     @app.route('/logout')
     def logout():
         logout_user()
@@ -64,7 +113,7 @@ def register_routes(app):
     @login_required
     def home():
         form = AudioUploadForm()
-        transcriptions = current_user.transcriptions.order_by(Transcription.created_at.desc()).all()
+        transcriptions = Transcription.query.filter_by(user_id=current_user.id).order_by(Transcription.created_at.desc()).all()
         return render_template('home.html', form=form, transcriptions=transcriptions)
     
     @app.route('/upload_audio', methods=['POST'])
@@ -73,31 +122,26 @@ def register_routes(app):
         form = AudioUploadForm()
         if form.validate_on_submit():
             try:
-                # Get audio file from the form
                 audio_file = form.audio_file.data
-                
                 if not audio_file:
                     flash('No audio file provided.')
                     return redirect(url_for('home'))
                 
-                # Save the file temporarily
                 filename = secure_filename(audio_file.filename)
                 temp_dir = tempfile.mkdtemp()
                 file_path = os.path.join(temp_dir, filename)
                 audio_file.save(file_path)
                 
-                # Process the audio file
                 title = form.title.data if form.title.data else f"Transcription {len(current_user.transcriptions.all()) + 1}"
                 transcription_text = transcribe_audio(file_path)
-                
                 if not transcription_text:
                     flash('Failed to transcribe the audio file.')
                     return redirect(url_for('home'))
                 
-                # Generate summary from the transcription
+                logger.debug(f"Transcription text for summary: {transcription_text}")
                 summary = generate_summary(transcription_text)
+                logger.debug(f"Generated summary: {summary}")
                 
-                # Save to database
                 transcription = Transcription(
                     title=title,
                     transcription_text=transcription_text,
@@ -107,17 +151,10 @@ def register_routes(app):
                 db.session.add(transcription)
                 db.session.commit()
                 
-                # Clean up the temporary file
                 os.unlink(file_path)
                 os.rmdir(temp_dir)
                 
-                # Instead of redirecting, render the home template with the transcription data
-                transcriptions = current_user.transcriptions.order_by(Transcription.created_at.desc()).all()
-                
-                # Flash a success message
                 flash('Audio successfully transcribed!')
-                
-                # Return to view the new transcription
                 return redirect(url_for('view_transcription', id=transcription.id))
             except Exception as e:
                 logger.error(f"Error in upload_audio: {str(e)}")
@@ -126,64 +163,93 @@ def register_routes(app):
         
         flash('Invalid form submission.')
         return redirect(url_for('home'))
-    
+
+
+
     @app.route('/transcribe_recording', methods=['POST'])
     @login_required
     def transcribe_recording():
         try:
-            # Check if the request has the file
             if 'audio' not in request.files:
-                return jsonify({'error': 'No audio file provided'}), 400
+                return jsonify({'success': False, 'error': 'No audio file provided.'}), 400
             
             audio_file = request.files['audio']
-            title = request.form.get('title', f"Recording {len(current_user.transcriptions.all()) + 1}")
+            logger.debug(f"Received audio file: {audio_file.filename}, content length: {request.content_length}, mimetype: {audio_file.mimetype}")
             
-            # Save the file temporarily
+            title = request.form.get('title', f"Recording {len(Transcription.query.filter_by(user_id=current_user.id).all()) + 1}")
+            request_id = request.form.get('request_id', str(uuid4()))
+
             temp_dir = tempfile.mkdtemp()
-            file_path = os.path.join(temp_dir, 'recording.wav')
-            audio_file.save(file_path)
+            original_filename = secure_filename(audio_file.filename or 'recording.webm')
+            original_file_path = os.path.join(temp_dir, original_filename)
             
-            # Process the audio file
-            transcription_text = transcribe_audio(file_path)
+            audio_file.save(original_file_path)
+            if not os.path.exists(original_file_path):
+                error_msg = f"Failed to save audio file to {original_file_path}"
+                logger.error(error_msg)
+                for file in [original_file_path]:
+                    if os.path.exists(file):
+                        os.unlink(file)
+                os.rmdir(temp_dir)
+                return jsonify({'success': False, 'error': error_msg}), 400
+            logger.info(f"Saved original file as: {original_file_path}, size: {os.path.getsize(original_file_path)} bytes")
+
+            wav_file_path = os.path.join(temp_dir, 'recording.wav')
+            try:
+                audio = AudioSegment.from_file(original_file_path)
+                logger.debug(f"Original audio duration: {len(audio) / 1000} seconds")
+                audio = audio.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+                audio.export(wav_file_path, format='wav', parameters=["-acodec", "pcm_s16le"])
+                logger.info(f"Converted to WAV: {wav_file_path}, size: {os.path.getsize(wav_file_path)} bytes")
+            except Exception as e:
+                error_msg = f"Error converting audio to WAV: {str(e)} with traceback: {traceback.format_exc()}"
+                logger.error(error_msg)
+                with open(original_file_path, 'rb') as f:
+                    logger.debug(f"File header: {f.read(44).hex() if f.read(44) else 'Empty'}")
+                for file in [original_file_path, wav_file_path]:
+                    if os.path.exists(file):
+                        os.unlink(file)
+                os.rmdir(temp_dir)
+                return jsonify({'success': False, 'error': error_msg}), 400
             
+            transcription_text = transcribe_audio(wav_file_path, noise_reduction=True)
             if not transcription_text:
-                return jsonify({'error': 'Failed to transcribe the audio'}), 500
+                error_msg = 'Failed to transcribe the audio file. Check audio format or transcription service.'
+                logger.warning(error_msg)
+                logger.debug(f"WAV file details: size={os.path.getsize(wav_file_path)} bytes, path={wav_file_path}")
+                with open(wav_file_path, 'rb') as f:
+                    logger.debug(f"WAV file header: {f.read(44).hex()}")
+                for file in [wav_file_path, original_file_path]:
+                    if os.path.exists(file):
+                        os.unlink(file)
+                os.rmdir(temp_dir)
+                return jsonify({'success': False, 'error': error_msg}), 400
             
-            # Generate summary from the transcription
+            logger.debug(f"Transcription text for summary: {transcription_text}")
             summary = generate_summary(transcription_text)
+            logger.debug(f"Generated summary: {summary}")
             
-            # Save to database
-            transcription = Transcription(
-                title=title,
-                transcription_text=transcription_text,
-                summary_text=summary,
-                user_id=current_user.id
-            )
+            transcription = Transcription(title=title, transcription_text=transcription_text, summary_text=summary, user_id=current_user.id, request_id=request_id)
             db.session.add(transcription)
             db.session.commit()
+            transcription_id = transcription.id
             
-            # Clean up the temporary file
-            os.unlink(file_path)
+            for file in [wav_file_path, original_file_path]:
+                if os.path.exists(file):
+                    os.unlink(file)
             os.rmdir(temp_dir)
             
-            return jsonify({
-                'success': True,
-                'id': transcription.id,
-                'transcription': transcription_text,
-                'summary': summary,
-                'title': title
-            })
-            
+            return jsonify({'success': True, 'id': transcription_id})
         except Exception as e:
-            logger.error(f"Error in transcribe_recording: {str(e)}")
-            return jsonify({'error': str(e)}), 500
-    
-    @app.route('/transcription/<int:id>')
+            logger.error(f"Error in transcribe_recording: {str(e)} with traceback: {traceback.format_exc()}")
+            return jsonify({'success': False, 'error': f'Error processing audio: {str(e)}'}), 500
+    @app.route('/view_transcription/<int:id>')
     @login_required
     def view_transcription(id):
-        transcription = Transcription.query.filter_by(id=id, user_id=current_user.id).first_or_404()
+        transcription = Transcription.query.get_or_404(id)
         return render_template('view_transcription.html', transcription=transcription)
-    
+   
+   
     @app.route('/edit_transcription/<int:id>', methods=['GET', 'POST'])
     @login_required
     def edit_transcription(id):

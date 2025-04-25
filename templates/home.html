@@ -26,27 +26,35 @@
                     <!-- Record Panel (Initially Hidden) -->
                     <div id="recordPanel" class="d-none">
                         <h4 class="mb-3">Record Audio</h4>
-                        <p>Click the record button and speak. Click stop when you're finished.</p>
+                        <p>Click the record button and speak. Click stop when you're finished, then submit to process.</p>
                         
-                        <div class="mb-3 mx-auto" style="max-width: 80%;">
-                            <label for="recordingTitle" class="form-label text-center d-block">Title (Optional)</label>
-                            <input type="text" class="form-control" id="recordingTitle" placeholder="Enter a title for your recording">
-                        </div>
-                        
-                        <div id="recordingVisualizer" class="audio-visualizer d-none"></div>
-                        
-                        <div id="recordingControls" class="recording-controls">
-                            <button id="recordButton" class="btn record-button" style="background-color: var(--primary-color); color: white;" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
-                                <i class="fas fa-microphone"></i>
-                            </button>
-                            <button id="stopRecordButton" class="btn record-button d-none" style="background-color: var(--primary-color); color: white;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
-                                <i class="fas fa-stop"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="text-center">
-                            <p id="recordStatus" class="text-secondary">Ready to record</p>
-                        </div>
+                        <form id="recordForm" action="{{ url_for('transcribe_recording') }}" method="post" enctype="multipart/form-data">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3 mx-auto" style="max-width: 80%;">
+                                <label for="recordingTitle" class="form-label text-center d-block">Title (Optional)</label>
+                                <input type="text" class="form-control" id="recordingTitle" name="title" placeholder="Enter a title for your recording">
+                            </div>
+                            
+                            <div id="recordingVisualizer" class="audio-visualizer d-none"></div>
+                            
+                            <div id="recordingControls" class="recording-controls">
+                                <button id="recordButton" type="button" class="btn record-button" style="background-color: var(--primary-color); color: white;" data-bs-toggle="tooltip" data-bs-placement="top" title="Start Recording">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <button id="stopRecordButton" type="button" class="btn record-button d-none" style="background-color: var(--primary-color); color: white;" data-bs-toggle="tooltip" data-bs-placement="top" title="Stop Recording">
+                                    <i class="fas fa-stop"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="text-center">
+                                <p id="recordStatus" class="text-secondary">Ready to record</p>
+                            </div>
+                            
+                            <div class="d-grid mt-3">
+                                <input class="btn btn-primary" id="submit" type="submit" value="Transcribe">
+                            </div>
+                        </form>
                         
                         <button id="backFromRecord" class="btn btn-outline-secondary mt-3">
                             <i class="fas fa-arrow-left me-1"></i> Back
@@ -90,18 +98,7 @@
                 </div>
             </div>
             
-            <!-- Processing overlay -->
-            <div id="processingOverlay" class="card mb-4 d-none">
-                <div class="card-body text-center py-5">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <h5>Processing your audio...</h5>
-                    <p class="text-muted">This may take a moment depending on the length of your recording.</p>
-                </div>
-            </div>
-            
-            <!-- Transcription and Summary Results -->
+            <!-- Transcription and Summary Results (Optional, can be removed if redirecting to view_transcription.html) -->
             <div id="resultCards" class="d-none">
                 <!-- Transcription card -->
                 <div class="card mb-4">
@@ -148,7 +145,7 @@
                                 <div class="transcription-item" data-id="{{ transcription.id }}">
                                     <h6 class="mb-1">{{ transcription.title }}</h6>
                                     <div class="transcription-date">
-                                        <small>{{ transcription.created_at.strftime('%B %d, %Y at %H:%M') }}</small>
+                                        <small>{{ transcription.created_at.strftime('%B %d, %Y at %H:M') }}</small>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -164,4 +161,90 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const showRecordButton = document.getElementById('showRecordButton');
+        const showUploadButton = document.getElementById('showUploadButton');
+        const recordPanel = document.getElementById('recordPanel');
+        const uploadPanel = document.getElementById('uploadPanel');
+        const backFromRecord = document.getElementById('backFromRecord');
+        const backFromUpload = document.getElementById('backFromUpload');
+        const recordButton = document.getElementById('recordButton');
+        const stopRecordButton = document.getElementById('stopRecordButton');
+        const recordStatus = document.getElementById('recordStatus');
+        const recordForm = document.getElementById('recordForm');
+        let recorder, audioBlob;
+
+        // Toggle panels
+        showRecordButton.addEventListener('click', () => {
+            recordPanel.classList.remove('d-none');
+            uploadPanel.classList.add('d-none');
+        });
+
+        showUploadButton.addEventListener('click', () => {
+            uploadPanel.classList.remove('d-none');
+            recordPanel.classList.add('d-none');
+        });
+
+        backFromRecord.addEventListener('click', () => {
+            recordPanel.classList.add('d-none');
+        });
+
+        backFromUpload.addEventListener('click', () => {
+            uploadPanel.classList.add('d-none');
+        });
+
+        // Recording controls
+        recordButton.addEventListener('click', () => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Audio recording not supported in this browser.');
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    recorder = new MediaRecorder(stream);
+                    const audioChunks = [];
+                    recorder.ondataavailable = e => audioChunks.push(e.data);
+                    recorder.onstop = () => {
+                        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioInput = document.createElement('input');
+                        audioInput.type = 'hidden';
+                        audioInput.name = 'audio';
+                        audioInput.id = 'audioInput';
+                        recordForm.appendChild(audioInput);
+                        const dataTransfer = new DataTransfer();
+                        const file = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
+                        dataTransfer.items.add(file);
+                        audioInput.files = dataTransfer.files;
+                        recordStatus.textContent = 'Recording stopped. Click Transcribe to submit.';
+                        recordButton.classList.remove('d-none');
+                        stopRecordButton.classList.add('d-none');
+                    };
+                    recorder.start();
+                    recordStatus.textContent = 'Recording...';
+                    recordButton.classList.add('d-none');
+                    stopRecordButton.classList.remove('d-none');
+                })
+                .catch(error => {
+                    console.error('Error accessing microphone:', error);
+                    alert('Error accessing microphone: ' + error.message);
+                });
+        });
+
+        stopRecordButton.addEventListener('click', () => {
+            if (recorder) recorder.stop();
+        });
+
+        // Prevent default form submission until recording is stopped
+        recordForm.addEventListener('submit', (event) => {
+            if (!audioBlob) {
+                event.preventDefault();
+                alert('Please record audio before submitting.');
+            }
+        });
+    });
+</script>
 {% endblock %}

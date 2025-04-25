@@ -8,9 +8,9 @@
     --dark-card: #252525;
     --text-light: #f1f1f1;
     --text-muted: #b2b2b2;
-    --danger: #e74c3c;
-    --success: #2ecc71;
-    --warning: #f39c12;
+    --danger:#f1f1f1;
+    --success: #f1f1f1;
+    --warning: #f1f1f1;
     --border-radius: 8px;
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
