@@ -51,18 +51,10 @@
 ### Input Audio
 > Spoken: *"Quantum mechanics is a fundamental branch of physics..."*
 
-### Transcribed Text (609 characters)
+### Transcribed Text (609 characters) and Generated Summary
 <img width="1302" height="645" alt="image" src="https://github.com/user-attachments/assets/ef391464-a346-4fde-bd8b-6cfcec9e250e" />
 
-Generated Summary
-<img width="1302" height="645" alt="image" src="https://github.com/user-attachments/assets/fd70dde9-4f86-46e6-9893-0dbcdafd6a86" />
-
 > **Note**: T5-Small model failed to load due to i3 memory constraints. Extractive summarization used as fallback.
-
----
-
-
----
 
 ## How to Run (For Examiners)
 
